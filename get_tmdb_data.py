@@ -2,7 +2,6 @@
 Gets a list of the TMDB ids for each movie using a number of different approaches.
 If you save the movie id then you can more easily query the TMDB API to find movie information.
 """
-import numpy as np
 import pandas as pd
 
 
@@ -90,6 +89,5 @@ if __name__ == '__main__':
     df_raw = pd.read_csv('bfi.csv', usecols=cols, skiprows=1, nrows=15)
 
     df_new = get_data_tmdbv3api(api_key, df_raw)
-    #df_new = get_data_requests(api_key, df_raw)
+    # df_new = get_data_requests(api_key, df_raw)
     df_new.to_csv('bfi_with_tmdb_id.csv')
-
