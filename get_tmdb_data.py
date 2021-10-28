@@ -5,22 +5,12 @@ If you save the movie id then you can more easily query the TMDB API to find mov
 import pandas as pd
 
 
-def set_pandas_display_options(df):
-    """
-    Set the pandas display options to the size of the dataframe
-    :param df:
-    :return:
-    """
-    pd.set_option('display.max_rows', df.shape[0] + 1)
-    pd.set_option('display.max_columns', df.shape[1] + 1)
-
-
 def get_data_tmdbv3api(api_key, df):
     """
     Gets movie ids using the tmdbv3api library
     :param api_key: your TMDB API key
     :param df: the current dataframe
-    :return: df: dataframe with the TMDB_id column values
+    :return: df: dataframe with values in the TMDB_id column
     """
     from tmdbv3api import TMDb, Movie
     tmdb = TMDb()
@@ -37,8 +27,11 @@ def get_data_tmdbv3api(api_key, df):
         if not search:
             df.at[index, 'TMDB_id'] = 0
         else:
-            tmdb_id = search[0].id  # Crude as there may be more than 1 film with that name!
+            # Takes the id from the first of the search results, if there are more than 1 film with the same title
+            # this may not be the correct result!
+            tmdb_id = search[0].id
             df.at[index, 'TMDB_id'] = tmdb_id
+    # Convert the column to int otherwise it would be float
     df['TMDB_id'] = df['TMDB_id'].astype(int)
     return df
 
@@ -48,7 +41,7 @@ def get_data_requests(api_key, df):
     Gets the movie ids using the requests library
     :param api_key: your TMDB API key
     :param df: the current dataframe
-    :return: df: dataframe with the TMDB_id column values
+    :return: df: dataframe with values in the TMDB_id column
     """
     import requests
 
@@ -80,14 +73,19 @@ def get_data_requests(api_key, df):
 
 
 if __name__ == '__main__':
-    # Your API key here
+    # Add your TMDB V3 API key here
     api_key = ''
 
+    # The data file as downloaded from the Moodle link only had 15 rows of data plus rows with total as well as
+    # unncessary columns
+    # The code below just reads in the rows and columns for that I think are needed
     cols = ['Rank', 'Film', 'Country of Origin', 'Weekend Gross', 'Distributor', '% change on last week',
             'Weeks on release', 'Number of cinemas', 'Site average', 'Total Gross to date']
-
     df_raw = pd.read_csv('bfi.csv', usecols=cols, skiprows=1, nrows=15)
 
+    # Use one of the following two methods (not both!)
     df_new = get_data_tmdbv3api(api_key, df_raw)
     # df_new = get_data_requests(api_key, df_raw)
+
+    # Remember to save the result out to a new csv file
     df_new.to_csv('bfi_with_tmdb_id.csv')
